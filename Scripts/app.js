@@ -5,46 +5,81 @@ console.log("App Started");
 
 // IIFE
 (function() {
-    let data = {
-        "games": [
-            {
-                "name": "Fallout 4",
-                "cost": 69.99,
-                "rating": 4.3
-            },
-            {
-                "name": "Overwatch",
-                "cost": 49.99,
-                "rating": 5.0
-            },
-            {
-                "name": "Diablo 3",
-                "cost": 79.99,
-                "rating": 4.5
-            }
-        ]
-    };
 
-    console.log(`First games: ${data.games[0].name}`);
+    let mainNav = document.getElementById("mainNav");
+    let navbarHTML;
+    // step 1 = need a XHR elements
+    let navXHR = new XMLHttpRequest();
+    // step 2 - open a file
+    navXHR.open("GET", "../navbar.html", true);
+    //step 3 - send the XMLHttpRequest
+    navXHR.send();
+    //step 4 - list for readyState of 4 and server status of 200 onreadystatechange
+    navXHR.onreadystatechange = function() {
+        if(this.readyState === 4 && this.status === 200) {
+            // read the data
+            navbarHTML = this.responseText;
+        }
+    }
+    // step 5 - wait until the nav bar file finished loading
+    navXHR.addEventListener("load", function() {
+        mainNav.innerHTML = navbarHTML;
+        switch (document.title) {
+            case "Home":
+                let homelink = document.getElementById("homelink");
+                homelink.setAttribute("class", "active");
+                break;
+            case "Project":
+                let projectslink = document.getElementById("projectslink");
+                projectslink.setAttribute("class", "active");
+                break;
+            case "Contact":
+                let contactslink = document.getElementById("contactslink");
+                contactslink.setAttribute("class", "active");
+                break;
+            default:
+                break;
+        }
+    });
+
 
     /* INTERPOLATION */
     // console.info(`Page title: ${document.title}`); 
     /* --------------------------------------------- */
     if(document.title == "Home") {
-        let gameListBody = document.getElementById("gameListBody");
-        //
-        data.games.forEach(function(game) {
-            // inject "template row" inside the dataRows div tag
-            let newRow = document.createElement("tr");
-            newRow.innerHTML = `
-                <tr>
-                    <td>${game.name}</td>
-                    <td class="text-center">${game.cost}</td>
-                    <td class="text-center">${game.rating}</td>
-                </tr>
-            `;
-            gameListBody.appendChild(newRow);
-        }, this);
+
+        let data = {};
+        // step 1 - instatiate an XHR object
+        let XHR = new XMLHttpRequest();
+        // step 2 - open the json file
+        XHR.open("GET", "../games.json", true);
+        // step 3 - send out a call to the XHR object
+        XHR.send(null);
+        // step 4 - listen for ready state to be 4
+        XHR.onreadystatechange = function() {
+            if((this.readyState === 4) && (this.status === 200)) {
+                data = JSON.parse(this.responseText);
+            }
+        };
+
+        // step 5 - wait until the data is finished loading before injecting the data
+        XHR.addEventListener("load", function () {
+            let gameListBody = document.getElementById("gameListBody");
+            //
+            data.games.forEach(function(game) {
+                // inject "template row" inside the dataRows div tag
+                let newRow = document.createElement("tr");
+                newRow.innerHTML = `
+                    <tr>
+                        <td>${game.name}</td>
+                        <td class="text-center">${game.cost}</td>
+                        <td class="text-center">${game.rating}</td>
+                    </tr>
+                `;
+                gameListBody.appendChild(newRow);
+            }, this);
+        });
+         
     } // end if Home
     else if (document.title == "Project") {
        
